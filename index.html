@@ -97,14 +97,29 @@
       font-variant-numeric: tabular-nums;
     }
     .dc-table tr:last-child td { border-bottom: none; }
-    .dc-table .dc { width: 4rem; }
-    .dc-table .pct {
+    .dc-table .dc {
+      width: 4rem;
+      vertical-align: top;
+    }
+    .dc-table .difficulty {
+      width: 9rem;
+      vertical-align: top;
+    }
+    .dc-table .dc-label {
+      font-size: inherit;
+      color: inherit;
+      margin-top: 0;
+      line-height: 1.2;
+      white-space: normal;
+    }
+    .dc-table td.pct {
+      width: 6rem;
       color: var(--accent);
       font-weight: 500;
     }
-    .dc-table .pct.high { color: #4ade80; }
-    .dc-table .pct.mid { color: #facc15; }
-    .dc-table .pct.low { color: #f87171; }
+    .dc-table td.pct.high { color: #4ade80; }
+    .dc-table td.pct.mid { color: #facc15; }
+    .dc-table td.pct.low { color: #f87171; }
   </style>
 </head>
 <body>
@@ -167,7 +182,8 @@
         <thead>
           <tr>
             <th class="dc">DC</th>
-            <th class="pct">Pass %</th>
+            <th>Pass %</th>
+            <th class="difficulty">Difficulty</th>
           </tr>
         </thead>
         <tbody id="dcBody"></tbody>
@@ -317,6 +333,15 @@
         };
       }
 
+      const DC_LABELS = {
+        5: 'Very Easy',
+        10: 'Easy',
+        15: 'Medium',
+        20: 'Hard',
+        25: 'Very Hard',
+        30: 'Nearly Impossible',
+      };
+
       function updateChances() {
         const state = getState();
         const mod = getModifier(state);
@@ -330,9 +355,16 @@
           const effectiveMin = dc - mod;
           const p = probabilityAtLeast(totalDist, effectiveMin);
           const pct = (100 * p).toFixed(1);
+          const label = DC_LABELS[dc];
+          const labelHtml = label
+            ? '<div class="dc-label">' + label + '</div>'
+            : '<div class="dc-label">&nbsp;</div>';
           const tr = document.createElement('tr');
           const pctClass = p >= 0.75 ? 'high' : p >= 0.5 ? 'mid' : 'low';
-          tr.innerHTML = '<td class="dc">' + dc + '</td><td class="pct ' + pctClass + '">' + pct + '%</td>';
+          tr.innerHTML =
+            '<td class="dc">' + dc + '</td>' +
+            '<td class="pct ' + pctClass + '">' + pct + '%</td>' +
+            '<td class="difficulty">' + labelHtml + '</td>';
           tbody.appendChild(tr);
         }
         updateUrlFromState();
